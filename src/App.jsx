@@ -1,11 +1,16 @@
-import { useState, useEffect } from "react";
+import React from "react";
+import  { useState, useEffect } from "react";
 
 // Product component
 function Product({ item, addToCart }) {
+  const formatPrice = (price) => {
+    const numPrice = Number(price);
+    return isNaN(numPrice) ? "Invalid Price" : `$${numPrice.toFixed(2)}`;
+  };
   return (
     <div>
       <h3>{item.name}</h3>
-      <p>Price: ${item.price.toFixed(2)}</p>
+      <p>Price: {formatPrice(item.price)}</p>
       <button onClick={() => addToCart(item)}>Add to Cart</button>
     </div>
   );
@@ -56,11 +61,12 @@ function NewProductForm({ addProduct }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!newProduct.name || newProduct.price <= 0 || isNaN(newProduct.price)) {
+    const price = parseFloat(newProduct.price);
+    if (!newProduct.name ||  isNaN(price) || price <= 0) {
       alert("Please enter a valid name and price.");
       return;
     }
-    addProduct(newProduct);
+    addProduct({ ...newProduct, price });
     setNewProduct({ name: "", price: "" });
   };
 
@@ -109,13 +115,18 @@ function App() {
   };
 
   const addProduct = (product) => {
-    setProducts([...products, product]);
+    const newProduct = {
+      ...product,
+      id: Date.now(),
+      price: parseFloat(product.price)
+    };
+    setProducts([...products, newProduct]);
   };
 
   useEffect(() => {
     console.log("Cart updated");
     // Error 6: Incorrect dependency array
-  }, [cart, undefinedVariable]);
+  }, [cart]);
 
   return (
     <div className="container">
@@ -126,7 +137,7 @@ function App() {
       <div className="product-list">
         {products.map((product) => (
           <div className="product-card" key={product.id}>
-            <Product item={product.name} addToCart={addToCart} />
+            <Product item={product} addToCart={addToCart} />
           </div>
         ))}
       </div>
@@ -135,9 +146,7 @@ function App() {
     </div>
   );
 
-  console.log(undefinedVariable);
 }
 
-const [state, setState] = useState();
 
 export default App;
